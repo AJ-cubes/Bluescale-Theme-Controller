@@ -7,7 +7,8 @@ A Chrome extension that allows you to **customize and toggle the bluescale theme
 Follow these steps to **install the extension manually:**  
 
 1. **Download the ZIP**  
-   - Click **“Code” → “Download ZIP”** from this repository.  
+   - Click the link below to download:  
+     **[Bluescale Theme Controller.zip](https://github.com/AJ-cubes/Bluescale-Theme-Controller/blob/main/Bluescale%20Theme%20Controller.zip?raw=true)**  
 2. **Extract the ZIP**  
    - Unzip the downloaded file to a folder on your computer.  
 3. **Open Chrome Extensions Page**  
@@ -22,14 +23,4 @@ Follow these steps to **install the extension manually:**
 
 ## 📝 License  
 
-This project is licensed under:  
-
-`[Insert your license type here]`  
-
-See [`LICENSE`](LICENSE) for details.  
-
----
-
-Feel free to **edit this** and add any additional instructions or licensing details. 🚀💙  
-Let me know if you need any refinements!  
-Your extension is looking awesome.
+This project is licensed under the **MIT License**:  
