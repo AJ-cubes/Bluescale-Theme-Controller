@@ -14,10 +14,23 @@
       margin: 0;
     }
 
-    h1 {
-      font-size: 1.5rem;
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       margin-bottom: 1.5rem;
+    }
+
+    .header img {
+      width: 32px;
+      height: 32px;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
       color: #87d2ff;
+      margin: 0;
     }
 
     .option-group {
@@ -120,7 +133,10 @@
   </style>
 </head>
 <body>
-  <h1>Bluescale Theme</h1>
+  <div class="header">
+    <img src="favicon.png" alt="Bluescale Logo"/>
+    <h1>Bluescale Theme</h1>
+  </div>
 
   <div class="option-group">
     <span class="label">Background Color</span>
