@@ -21,6 +21,14 @@ Follow these steps to **install the extension manually:**
    - The extension is now installed!  
    - Find it in the Chrome toolbar and start customizing your theme.  
 
+## 🎨 Example Themes  
+
+Looking for pre-made themes? Browse and download example `.bstc` files from the official **Bluescale Theme Examples** repository:  
+
+🔗 **[Browse Example Themes](https://github.com/AJ-cubes/Bluescale-Theme-Controller/tree/main/examples)**  
+
+Simply **import these files into the extension** and instantly apply new styles!  
+
 ## 📝 License  
 
 MIT License  
@@ -43,4 +51,4 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER  
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  
-SOFTWARE.
+SOFTWARE.  
