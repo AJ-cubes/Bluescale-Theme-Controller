@@ -93,7 +93,7 @@
     }
 
     input:checked + .slider::before {
-      transform: translateX(18px);
+      transform: translateX(22px);
     }
 
     button {
@@ -156,6 +156,12 @@
     </label>
   </div>
 
+  <div class="option-group">
+    <span class="label">Excluded Domains (newline-separated)</span>
+    <textarea id="excludeDomains" rows="3" cols="25" wrap="soft"></textarea>
+  </div>
+
+  <button id="currTab">Add Current Tab</button>
   <button id="reset">Reset to Default</button>
   <button id="exportBtn">Export Colors</button>
   <button id="importBtn">Import Colors</button>
