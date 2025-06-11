@@ -3,7 +3,7 @@
   "name": "Bluescale Theme Controller",
   "version": "1.0",
   "description": "Customize and toggle the Bluescale theme dynamically.",
-  "permissions": ["storage", "scripting", "tabs"],
+  "permissions": ["storage", "scripting", "tabs", "webNavigation"],
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "popup.html"
