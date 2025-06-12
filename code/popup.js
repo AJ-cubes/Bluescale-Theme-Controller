@@ -23,24 +23,45 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function applyColorsToAllTabs(bg, text, themeEnabled) {
-    chrome.tabs.query({}, (tabs) => {
-      tabs.forEach((tab) => {
-        chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: (bg, text, themeEnabled) => {
-            document.documentElement.style.setProperty("--bg-color", bg);
-            document.documentElement.style.setProperty("--text-color", text);
-            document.documentElement.classList.toggle("blue-mode", themeEnabled);
-          },
-          args: [bg, text, themeEnabled]
+    chrome.storage.sync.get(["excludeDomains"], (data) => {
+      const excludedSites = data.excludeDomains ? data.excludeDomains.split("\n") : [];
+
+      chrome.tabs.query({}, (tabs) => {
+        tabs.forEach((tab) => {
+          const currentDomain = new URL(tab.url).hostname;
+
+          if (!excludedSites.some(domain => currentDomain.includes(domain))) {
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              func: (bg, text, themeEnabled) => {
+                document.documentElement.style.setProperty("--bg-color", bg);
+                document.documentElement.style.setProperty("--text-color", text);
+                document.documentElement.classList.toggle("blue-mode", themeEnabled);
+              },
+              args: [bg, text, themeEnabled]
+            });
+          }
         });
       });
     });
   }
 
   function updatePopupTheme(bg, text, themeEnabled) {
-    document.body.style.backgroundColor = themeEnabled ? bg : fallbackBg;
-    document.body.style.color = themeEnabled ? text : fallbackText;
+    chrome.runtime.sendMessage({ action: "getTabURL" }, (response) => {
+      if (response.url) {
+        const currentDomain = new URL(response.url).hostname;
+
+        chrome.storage.sync.get(["excludeDomains"], (data) => {
+          const excludedSites = data.excludeDomains ? data.excludeDomains.split("\n") : [];
+          const isExcluded = excludedSites.includes(currentDomain);
+
+          if (!isExcluded) {
+            document.body.style.backgroundColor = themeEnabled ? bg : fallbackBg;
+            document.body.style.color = themeEnabled ? text : fallbackText;
+          }
+        });
+      }
+    });
   }
 
   bgPicker.addEventListener("input", () => {
@@ -62,15 +83,66 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   excludeDomainsInput.addEventListener("input", () => {
-    chrome.storage.sync.set({ excludeDomains: excludeDomainsInput.value });
+    chrome.storage.sync.get(["excludeDomains"], (prevData) => {
+      const previousExclusions = prevData.excludeDomains ? prevData.excludeDomains.split("\n").filter(Boolean) : [];
+
+      chrome.storage.sync.set({ excludeDomains: excludeDomainsInput.value }, () => {
+        const newExclusions = excludeDomainsInput.value.split("\n").filter(Boolean);
+
+        chrome.tabs.query({}, (tabs) => {
+          tabs.forEach((tab) => {
+            const currentDomain = new URL(tab.url).hostname;
+            const wasExcluded = previousExclusions.includes(currentDomain);
+            const isExcludedNow = newExclusions.includes(currentDomain);
+
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              func: (wasExcluded, isExcludedNow) => {
+                if (!wasExcluded && isExcludedNow) {
+                  document.documentElement.classList.remove("blue-mode");
+                } else if (wasExcluded && !isExcludedNow) {
+                  document.documentElement.classList.add("blue-mode");
+                }
+              },
+              args: [wasExcluded, isExcludedNow]
+            }).catch(err => console.warn("Failed to apply exclusions:", err));
+          });
+        });
+      });
+    });
   });
 
   currTab.addEventListener("click", () => {
-    chrome.runtime.sendMessage({ action: "getTabURL" }, (response) => {
-      if (response.url) {
-        const urlObj = new URL(response.url);
-        excludeDomainsInput.value += "\n" + urlObj.hostname;
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (!tabs.length || tabs[0].url.startsWith("chrome://")) {
+        console.warn("Cannot exclude a chrome:// URL.");
+        return;
       }
+
+      const currentTab = tabs[0];
+      const currentDomain = new URL(currentTab.url).hostname;
+
+      chrome.storage.sync.get(["excludeDomains"], (data) => {
+        let excludedSites = data.excludeDomains ? data.excludeDomains.split("\n").filter(Boolean) : [];
+
+        if (!excludedSites.includes(currentDomain)) {
+          excludedSites.push(currentDomain);
+          excludeDomainsInput.value = excludedSites.join("\n");
+
+          chrome.storage.sync.set({ excludeDomains: excludeDomainsInput.value }, () => {
+            chrome.scripting.executeScript({
+              target: { tabId: currentTab.id },
+              func: (currentDomain) => {
+                document.documentElement.classList.remove("blue-mode");
+                console.log(`Excluded site updated: ${currentDomain}`);
+              },
+              args: [currentDomain]
+            }).catch(err => console.warn("Failed to apply exclusions after adding tab:", err));
+          });
+        } else {
+          console.log(`Site ${currentDomain} is already excluded.`);
+        }
+      });
     });
   });
 
@@ -82,7 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
     applyColorsToAllTabs(fallbackBg, fallbackText, themeToggle.checked);
   });
 
-  // 🔹 Export Colors
   exportBtn.addEventListener("click", () => {
     const bstcFormat = `${bgPicker.value}$${textPicker.value}`;
     const blob = new Blob([bstcFormat], { type: "text/plain" });
@@ -92,7 +163,6 @@ document.addEventListener("DOMContentLoaded", () => {
     a.click();
   });
 
-  // 🔹 Import Colors (Trigger File Picker)
   importBtn.addEventListener("click", () => {
     importFile.click();
   });

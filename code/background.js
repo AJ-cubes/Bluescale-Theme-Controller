@@ -41,6 +41,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ url: null });
       }
     });
-    return true; // Keep sendResponse valid for async calls
+    return true;
   }
 });
