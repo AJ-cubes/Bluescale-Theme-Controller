@@ -134,13 +134,10 @@ document.addEventListener("DOMContentLoaded", () => {
               target: { tabId: currentTab.id },
               func: (currentDomain) => {
                 document.documentElement.classList.remove("blue-mode");
-                console.log(`Excluded site updated: ${currentDomain}`);
               },
               args: [currentDomain]
             }).catch(err => console.warn("Failed to apply exclusions after adding tab:", err));
           });
-        } else {
-          console.log(`Site ${currentDomain} is already excluded.`);
         }
       });
     });
@@ -173,7 +170,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const file = event.target.files[0];
     const reader = new FileReader();
     reader.onload = function (e) {
-      const [background, text] = e.target.result.split("$");
+      let [background, text] = e.target.result.split("$");
+      background = background.trim();
+      text = text.trim();
       chrome.storage.sync.set({ bgColor: background, textColor: text });
       bgPicker.value = background;
       textPicker.value = text;
