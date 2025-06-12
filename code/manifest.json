@@ -18,6 +18,7 @@
   "background": {
     "service_worker": "background.js"
   },
+  "update_url": "https://AJ-cubes.github.io/Bluescale-Theme-Controller/updates.xml",
   "icons": {
     "16": "favicon.png",
     "48": "favicon.png",
