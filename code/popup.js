@@ -188,4 +188,44 @@ document.addEventListener("DOMContentLoaded", () => {
       applyColorsToAllTabs(bgPicker.value, newTextColor, themeToggle.checked);
     });
   });
+
+  resetBtn.addEventListener("click", () => {
+    chrome.storage.sync.set({ bgColor: fallbackBg, textColor: fallbackText });
+    bgPicker.value = fallbackBg;
+    textPicker.value = fallbackText;
+    updatePopupTheme(fallbackBg, fallbackText, themeToggle.checked);
+    applyColorsToAllTabs(fallbackBg, fallbackText, themeToggle.checked);
+  });
+
+  exportBtn.addEventListener("click", () => {
+    const bstcFormat = `${bgPicker.value}$${textPicker.value}`;
+    const blob = new Blob([bstcFormat], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "Bluescale-Settings.bstc";
+    a.click();
+  });
+
+  importBtn.addEventListener("click", () => {
+    importFile.click();
+  });
+
+  importFile.setAttribute("title", "Bluescale Theme Controller file *.bstc");
+
+  importFile.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      let [background, text] = e.target.result.split("$");
+      background = background.trim();
+      text = text.trim();
+      chrome.storage.sync.set({ bgColor: background, textColor: text });
+      bgPicker.value = background;
+      textPicker.value = text;
+      updatePopupTheme(background, text, themeToggle.checked);
+      applyColorsToAllTabs(background, text, themeToggle.checked);
+    };
+    reader.readAsText(file);
+  });
+
 });
