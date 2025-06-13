@@ -33,8 +33,8 @@ Simply **import these files into the extension** and instantly apply new styles!
 
 Need help setting up the extension or importing themes? Download these step-by-step guide videos directly:  
 
-🔗 **[Setup Extension Tutorial](https://github.com/AJ-cubes/Bluescale-Theme-Controller/blob/main/tutorials/Setup_Extension.mp4?raw=true)**  
-🔗 **[Get More Themes Tutorial](https://github.com/AJ-cubes/Bluescale-Theme-Controller/blob/main/tutorials/Get_More_Themes.mp4?raw=true)**  
+🔗 **[Setup Extension Tutorial](https://github.com/AJ-cubes/Bluescale-Theme-Controller/blob/main/vidoes/Setup_Extension.mp4?raw=true)**  
+🔗 **[Get More Themes Tutorial](https://github.com/AJ-cubes/Bluescale-Theme-Controller/blob/main/videos/Get_More_Themes.mp4?raw=true)**  
 
 ## 📝 License  
 
