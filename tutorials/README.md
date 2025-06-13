@@ -7,7 +7,7 @@ A Chrome extension that allows you to **customize and toggle the Bluescale theme
 Need help setting up the extension or importing themes? Download these step-by-step guide videos directly:  
 
 🔗 **[Setup Extension Tutorial](https://github.com/AJ-cubes/Bluescale-Theme-Controller/blob/main/videos/Setup_Extension.mp4?raw=true)**  
-🔗 **[Get More Themes Tutorial](https://github.com/AJ-cubes/Bluescale-Theme-Controller/blob/main/videos/Get_More_Themes.mp4?raw=true)**  
+🔗 **[Get More Themes Tutorial](https://github.com/AJ-cubes/Bluescale-Theme-Controller/raw/refs/heads/main/videos/Get_More_Themes.mp4)**  
 
 ## 📝 License  
 
