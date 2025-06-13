@@ -135,6 +135,36 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  excludeDomainsInput.addEventListener("input", () => {
+    chrome.storage.sync.get(["excludeDomains"], (prevData) => {
+      const previousExclusions = prevData.excludeDomains ? prevData.excludeDomains.split("\n").filter(Boolean) : [];
+
+      chrome.storage.sync.set({ excludeDomains: excludeDomainsInput.value }, () => {
+        const newExclusions = excludeDomainsInput.value.split("\n").filter(Boolean);
+
+        chrome.tabs.query({}, (tabs) => {
+          tabs.forEach((tab) => {
+            const currentDomain = new URL(tab.url).hostname;
+            const wasExcluded = previousExclusions.includes(currentDomain);
+            const isExcludedNow = newExclusions.includes(currentDomain);
+
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              func: (wasExcluded, isExcludedNow) => {
+                if (!wasExcluded && isExcludedNow) {
+                  document.documentElement.classList.remove("blue-mode");
+                } else if (wasExcluded && !isExcludedNow) {
+                  document.documentElement.classList.add("blue-mode");
+                }
+              },
+              args: [wasExcluded, isExcludedNow]
+            }).catch(err => console.warn("Failed to apply exclusions:", err));
+          });
+        });
+      });
+    });
+  });
+
   themeToggle.addEventListener("change", () => {
     const newThemeEnabled = themeToggle.checked;
     chrome.storage.sync.set({ themeEnabled: newThemeEnabled }, () => {
