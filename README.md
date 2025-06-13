@@ -29,12 +29,12 @@ Looking for pre-made themes? Browse and download example `.bstc` files from the 
 
 Simply **import these files into the extension** and instantly apply new styles!  
 
-## 🎥 Tutorials  
+## 🎥 Download Tutorial  
 
-Need help setting up the extension or importing themes? Watch these step-by-step guides:  
+Need help setting up the extension or importing themes? Download these step-by-step guide videos directly:  
 
-🔗 **[Setup Extension Tutorial](https://github.com/AJ-cubes/Bluescale-Theme-Controller/blob/main/tutorials/Setup_Extension.mp4)**  
-🔗 **[Get More Themes Tutorial](https://github.com/AJ-cubes/Bluescale-Theme-Controller/blob/main/tutorials/Get_More_Themes.mp4)**  
+🔗 **[Setup Extension Tutorial](https://github.com/AJ-cubes/Bluescale-Theme-Controller/blob/main/tutorials/Setup_Extension.mp4?raw=true)**  
+🔗 **[Get More Themes Tutorial](https://github.com/AJ-cubes/Bluescale-Theme-Controller/blob/main/tutorials/Get_More_Themes.mp4?raw=true)**  
 
 ## 📝 License  
 
@@ -58,4 +58,4 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER  
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  
-SOFTWARE.  
+SOFTWARE.
