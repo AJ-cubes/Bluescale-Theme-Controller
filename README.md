@@ -29,13 +29,12 @@ Looking for pre-made themes? Browse and download example `.bstc` files from the 
 
 Simply **import these files into the extension** and instantly apply new styles!  
 
-## 🎥 Download Tutorial  
+## 🎥 Tutorials  
 
-Need help setting up the extension or importing themes? Click the links below to watch these step-by-step guide videos. ___(⚠️Middle-click or right-click and select 'Open link in a new tab'⚠️)___  
+Need help setting up the extension or importing themes? Watch these step-by-step guides:  
 
-🔗 **[Setup Extension Tutorial](https://github.com/AJ-cubes/Bluescale-Theme-Controller/blob/main/videos/Setup_Extension.mp4?raw=true)**  
-
-🔗 **[Get More Themes Tutorial](https://github.com/AJ-cubes/Bluescale-Theme-Controller/blob/main/videos/Get_More_Themes.mp4?raw=true)**  
+🔗 **[Setup Extension Tutorial](https://drive.google.com/file/d/1Ey1wkMThPigTNcYvCL4SUCV5iZ6MpP39/view?usp=sharing)**  
+🔗 **[Get More Themes Tutorial](https://drive.google.com/file/d/1uCzFEMLCzzE8_Xppv3503FSGEiQ-ubfm/view?usp=sharing)**  
 
 ## 📝 License  
 
