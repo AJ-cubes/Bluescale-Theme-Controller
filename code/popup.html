@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bluescale Theme</title>
+  <title>Bluescale Theme Controller</title>
   <style>
     body {
       background: #141e32;
@@ -13,7 +13,9 @@
       padding: 20px;
       margin: 0;
     }
-
+    html {
+      width: 290px;
+    }
     .header {
       display: flex;
       align-items: center;
@@ -21,23 +23,19 @@
       gap: 10px;
       margin-bottom: 1.5rem;
     }
-
     .header img {
       width: 32px;
       height: 32px;
     }
-
     .header h1 {
       font-size: 1.5rem;
       color: #87d2ff;
       margin: 0;
     }
-
     .version {
       font-size: 0.8rem;
       color: #a8c7e8;
     }
-
     .option-group {
       display: flex;
       align-items: center;
@@ -45,11 +43,9 @@
       gap: 10px;
       margin-bottom: 1rem;
     }
-
     .label {
       font-size: 1rem;
     }
-
     input[type="color"] {
       appearance: none;
       border: none;
@@ -58,20 +54,17 @@
       cursor: pointer;
       background: none;
     }
-
     .switch {
       position: relative;
       display: inline-block;
       width: 50px;
       height: 28px;
     }
-
     .switch input {
       opacity: 0;
       width: 0;
       height: 0;
     }
-
     .slider {
       position: absolute;
       cursor: pointer;
@@ -80,7 +73,6 @@
       border-radius: 34px;
       transition: 0.3s ease-in-out;
     }
-
     .slider::before {
       position: absolute;
       content: "";
@@ -92,15 +84,16 @@
       border-radius: 50%;
       transition: 0.3s ease-in-out;
     }
-
     input:checked + .slider {
       background-color: #4db9ff;
     }
-
     input:checked + .slider::before {
       transform: translateX(22px);
     }
-
+    .switch input:disabled + .slider {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     button {
       display: block;
       width: 100%;
@@ -113,77 +106,73 @@
       border-radius: 4px;
       cursor: pointer;
     }
-
     button:hover {
       background-color: #3290e0;
     }
-
     #importFile {
       display: none;
     }
-
     .examples-link {
       margin-top: 2rem;
       font-size: 0.9rem;
     }
-
     .examples-link a {
       color: #87d2ff;
       text-decoration: none;
     }
-
     .examples-link a:hover {
       text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <img src="favicon.png" alt="Bluescale Logo"/>
-    <h1>Bluescale Theme</h1>
-    <span class="version">v3.9</span>
-  </div>
+<div class="header">
+  <img src="icons/favicon.png" alt="Bluescale Logo"/>
+  <h1>Bluescale</h1>
+  <span class="version">v3.9</span>
+</div>
 
-  <div class="option-group">
-    <span class="label">Background Color</span>
-    <input type="color" id="bgColorPicker" />
-  </div>
+<div class="option-group">
+  <span class="label">Background Color</span>
+  <input type="color" id="bgColorPicker" />
+</div>
 
-  <div class="option-group">
-    <span class="label">Text Color</span>
-    <input type="color" id="textColorPicker" />
-  </div>
+<div class="option-group">
+  <span class="label">Text Color</span>
+  <input type="color" id="textColorPicker" />
+</div>
 
-  <div class="option-group">
-    <span class="label">Toggle Theme</span>
-    <label class="switch">
-      <input type="checkbox" id="themeToggle" />
-      <span class="slider"></span>
-    </label>
-  </div>
+<div class="option-group">
+  <span class="label">Toggle Theme</span>
+  <label class="switch">
+    <input type="checkbox" id="themeToggle" />
+    <span class="slider"></span>
+  </label>
+</div>
 
-  <div class="option-group">
-    <span class="label">Excluded Domains (newline-separated)</span>
-    <textarea id="excludeDomains" rows="3" cols="25" wrap="soft"></textarea>
-  </div>
+<div class="option-group">
+  <span class="label">Change colors on<br><span id="currentDomainLabel"></span></span>
+  <label class="switch">
+    <input type="checkbox" id="domainToggle" />
+    <span class="slider"></span>
+  </label>
+</div>
 
-  <button id="currTab">Add Current Tab</button>
-  <button id="reset">🔄 Reset to Default</button>
-  <button id="exportBtn">📦 Export Theme</button>
-  <button id="importBtn">📩 Import Theme</button>
-  <input type="file" id="importFile" accept=".bstc" title="Bluescale Theme Controller file *.bstc" />
+<button id="reset">🔄 Reset to Default</button>
+<button id="exportBtn">📦 Export Theme</button>
+<button id="importBtn">📩 Import Theme</button>
+<input type="file" id="importFile" accept=".bstc" title="Bluescale Theme Controller file *.bstc" />
 
-  <div class="examples-link">
-    <a href="https://github.com/AJ-cubes/Bluescale-Theme-Controller/tree/main/examples" target="_blank">
-      🎨 Browse Example Themes on GitHub
-    </a>
-    <a><br></a>
-    <a href="https://github.com/AJ-cubes/Bluescale-Theme-Controller/tree/main/tutorials" target="_blank">
-      📖 View Tutorials on GitHub
-    </a>
-  </div>
+<div class="examples-link">
+  <a href="https://github.com/AJ-cubes/Bluescale-Theme-Controller/tree/main/examples" target="_blank">
+    🎨 Browse Example Themes on GitHub
+  </a>
+  <br>
+  <a href="https://drive.google.com/drive/u/0/folders/1DEe1c0TmnX67aV0Vmblbn2W4JWY767_o" target="_blank">
+    📖 View Tutorials on Google Drive
+  </a>
+</div>
 
-
-  <script src="popup.js"></script>
+<script src="popup.js"></script>
 </body>
 </html>

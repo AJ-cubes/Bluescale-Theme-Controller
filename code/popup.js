@@ -1,231 +1,233 @@
 document.addEventListener("DOMContentLoaded", () => {
   const bgPicker = document.getElementById("bgColorPicker");
   const textPicker = document.getElementById("textColorPicker");
-  const excludeDomainsInput = document.getElementById("excludeDomains");
   const themeToggle = document.getElementById("themeToggle");
-  const currTab = document.getElementById("currTab");
   const resetBtn = document.getElementById("reset");
   const exportBtn = document.getElementById("exportBtn");
   const importBtn = document.getElementById("importBtn");
   const importFile = document.getElementById("importFile");
+  const domainToggle = document.getElementById("domainToggle");
+  const currentDomainLabel = document.getElementById("currentDomainLabel");
+  const headerIcon = document.querySelector(".header img");
 
   const fallbackBg = "#141e32";
   const fallbackText = "#d2e6ff";
+  let currentDomain = "";
+  let currentSettings = { bgColor: fallbackBg, textColor: fallbackText, themeEnabled: true, excludeDomains: "" };
 
-  chrome.storage.sync.get(["bgColor", "textColor", "themeEnabled", "excludeDomains"], (data) => {
-    const bgColor = data.bgColor || fallbackBg;
-    const textColor = data.textColor || fallbackText;
-    const themeEnabled = data.themeEnabled !== false;
+  function updateExtensionIcon(isEnabled, isDomainEnabled = true) {
+    const iconPrefix = isEnabled
+      ? (isDomainEnabled ? "favicon" : "favicon-off")
+      : "favicon-disabled";
 
-    bgPicker.value = bgColor;
-    textPicker.value = textColor;
-    themeToggle.checked = themeEnabled;
-    excludeDomainsInput.value = data.excludeDomains || "";
-
-    updatePopupTheme(bgColor, textColor, themeEnabled);
-    applyColorsToAllTabs(bgColor, textColor, themeEnabled);
-    updateCurrTabButton();
-  });
-
-  function applyColorsToAllTabs(bg, text, themeEnabled) {
-    chrome.storage.sync.get(["excludeDomains"], (data) => {
-      const excludedSites = data.excludeDomains ? data.excludeDomains.split("\n").filter(Boolean) : [];
-
-      chrome.tabs.query({}, (tabs) => {
-        tabs.forEach((tab) => {
-          const currentDomain = new URL(tab.url).hostname;
-
-          if (!excludedSites.some(domain => currentDomain.includes(domain))) {
-            chrome.scripting.executeScript({
-              target: { tabId: tab.id },
-              func: (bg, text, themeEnabled) => {
-                document.documentElement.style.setProperty("--bg-color", bg);
-                document.documentElement.style.setProperty("--text-color", text);
-                document.documentElement.classList.toggle("blue-mode", themeEnabled);
-              },
-              args: [bg, text, themeEnabled]
-            });
-          }
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length) {
+        chrome.runtime.sendMessage({
+          type: "updateIcon",
+          isEnabled: isEnabled,
+          isDomainEnabled: isDomainEnabled,
+          tabId: tabs[0].id
         });
-      });
+      }
     });
+
+    if (headerIcon) {
+      headerIcon.src = chrome.runtime.getURL(`icons/${iconPrefix}-48.png`);
+    }
+  }
+
+  function updateDomainToggleState(themeEnabled) {
+    domainToggle.disabled = !themeEnabled;
+    domainToggle.parentElement.style.opacity = themeEnabled ? "1" : "0.5";
+    domainToggle.parentElement.style.cursor = themeEnabled ? "pointer" : "not-allowed";
   }
 
   function updatePopupTheme(bg, text, themeEnabled) {
-    chrome.runtime.sendMessage({ action: "getTabURL" }, (response) => {
-      if (response.url) {
-        const currentDomain = new URL(response.url).hostname;
+    document.body.style.backgroundColor = themeEnabled ? bg : fallbackBg;
+    document.body.style.color = themeEnabled ? text : fallbackText;
+    document.querySelector(".header h1").style.color = themeEnabled ? text : fallbackText;
+    document.querySelector(".header .version").style.color = themeEnabled ? text : fallbackText;
+  }
 
-        chrome.storage.sync.get(["excludeDomains"], (data) => {
-          const excludedSites = data.excludeDomains ? data.excludeDomains.split("\n").filter(Boolean) : [];
-          const isExcluded = excludedSites.includes(currentDomain);
-
-          if (!isExcluded) {
-            document.body.style.backgroundColor = themeEnabled ? bg : fallbackBg;
-            document.body.style.color = themeEnabled ? text : fallbackText;
-
-            document.querySelector(".header h1").style.color = themeEnabled ? text : fallbackText;
-            document.querySelector(".header .version").style.color = themeEnabled ? text : fallbackText;
-          }
-        });
+  function updateCurrentTab() {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length && !tabs[0].url.startsWith("chrome://")) {
+        chrome.scripting.executeScript({
+          target: { tabId: tabs[0].id },
+          func: (bg, text, themeEnabled) => {
+            if (themeEnabled) {
+              document.documentElement.style.setProperty("--bg-color", bg);
+              document.documentElement.style.setProperty("--text-color", text);
+              document.documentElement.classList.add("blue-mode");
+            } else {
+              document.documentElement.style.removeProperty("--bg-color");
+              document.documentElement.style.removeProperty("--text-color");
+              document.documentElement.classList.remove("blue-mode");
+            }
+          },
+          args: [currentSettings.bgColor, currentSettings.textColor, currentSettings.themeEnabled]
+        }).catch(() => {});
       }
     });
   }
 
-  function updateCurrTabButton() {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (!tabs.length || tabs[0].url.startsWith("chrome://")) {
-        currTab.textContent = "➕ Add Current Tab";
-        return;
-      }
+  function initializePopup() {
+    chrome.storage.sync.get(["bgColor", "textColor", "themeEnabled", "excludeDomains"], (data) => {
+      currentSettings = {
+        bgColor: data.bgColor || fallbackBg,
+        textColor: data.textColor || fallbackText,
+        themeEnabled: data.themeEnabled !== false,
+        excludeDomains: data.excludeDomains || ""
+      };
 
-      const currentDomain = new URL(tabs[0].url).hostname;
-      chrome.storage.sync.get(["excludeDomains"], (data) => {
-        const excludedSites = data.excludeDomains ? data.excludeDomains.split("\n").filter(Boolean) : [];
-        currTab.textContent = excludedSites.includes(currentDomain) ? "❌ Remove Current Tab" : "➕ Add Current Tab";
+      bgPicker.value = currentSettings.bgColor;
+      textPicker.value = currentSettings.textColor;
+      themeToggle.checked = currentSettings.themeEnabled;
+      updateDomainToggleState(currentSettings.themeEnabled);
+      updatePopupTheme(currentSettings.bgColor, currentSettings.textColor, currentSettings.themeEnabled);
+
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs.length && !tabs[0].url.startsWith("chrome://")) {
+          currentDomain = new URL(tabs[0].url).hostname;
+          currentDomainLabel.textContent = currentDomain;
+          const excludedSites = currentSettings.excludeDomains.split("\n").filter(Boolean);
+          const isDomainExcluded = excludedSites.includes(currentDomain);
+          domainToggle.checked = !isDomainExcluded;
+          updateExtensionIcon(currentSettings.themeEnabled, !isDomainExcluded);
+        }
       });
     });
   }
 
-  currTab.addEventListener("click", () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (!tabs.length || tabs[0].url.startsWith("chrome://")) {
-        console.warn("Cannot exclude a chrome:// URL.");
-        return;
-      }
+  domainToggle.addEventListener("change", () => {
+    if (!currentDomain) return;
+    let excludedSites = currentSettings.excludeDomains.split("\n").filter(Boolean);
 
-      const currentTab = tabs[0];
-      const currentDomain = new URL(currentTab.url).hostname;
+    if (domainToggle.checked) {
+      excludedSites = excludedSites.filter(domain => domain !== currentDomain);
+    } else if (!excludedSites.includes(currentDomain)) {
+      excludedSites.push(currentDomain);
+    }
 
-      chrome.storage.sync.get(["excludeDomains"], (data) => {
-        let excludedSites = data.excludeDomains ? data.excludeDomains.split("\n").filter(Boolean) : [];
+    currentSettings.excludeDomains = excludedSites.join("\n");
+    chrome.storage.sync.set({ excludeDomains: currentSettings.excludeDomains }, () => {
+      updateExtensionIcon(currentSettings.themeEnabled, domainToggle.checked);
 
-        if (excludedSites.includes(currentDomain)) {
-          excludedSites = excludedSites.filter(domain => domain !== currentDomain);
-          excludeDomainsInput.value = excludedSites.join("\n");
-
-          chrome.storage.sync.set({ excludeDomains: excludeDomainsInput.value }, () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs.length && !tabs[0].url.startsWith("chrome://")) {
+          if (domainToggle.checked) {
             chrome.scripting.executeScript({
-              target: { tabId: currentTab.id },
-              func: (currentDomain) => {
+              target: { tabId: tabs[0].id },
+              func: (bg, text) => {
+                document.documentElement.style.setProperty("--bg-color", bg);
+                document.documentElement.style.setProperty("--text-color", text);
                 document.documentElement.classList.add("blue-mode");
               },
-              args: [currentDomain]
-            }).catch(err => console.warn("Failed to re-enable Blue Mode:", err));
-
-            currTab.textContent = "➕ Add Current Tab";
-          });
-        } else {
-          excludedSites.push(currentDomain);
-          excludeDomainsInput.value = excludedSites.join("\n");
-
-          chrome.storage.sync.set({ excludeDomains: excludeDomainsInput.value }, () => {
+              args: [currentSettings.bgColor, currentSettings.textColor]
+            }).catch(() => {});
+          } else {
             chrome.scripting.executeScript({
-              target: { tabId: currentTab.id },
-              func: (currentDomain) => {
+              target: { tabId: tabs[0].id },
+              func: () => {
+                document.documentElement.style.removeProperty("--bg-color");
+                document.documentElement.style.removeProperty("--text-color");
                 document.documentElement.classList.remove("blue-mode");
-              },
-              args: [currentDomain]
-            }).catch(err => console.warn("Failed to apply exclusions:", err));
-
-            currTab.textContent = "❌ Remove Current Tab";
-          });
+              }
+            }).catch(() => {});
+          }
         }
       });
     });
   });
 
-  excludeDomainsInput.addEventListener("input", () => {
-    chrome.storage.sync.get(["excludeDomains"], (prevData) => {
-      const previousExclusions = prevData.excludeDomains ? prevData.excludeDomains.split("\n").filter(Boolean) : [];
+  themeToggle.addEventListener("change", () => {
+    currentSettings.themeEnabled = themeToggle.checked;
+    chrome.storage.sync.set({ themeEnabled: currentSettings.themeEnabled }, () => {
+      updatePopupTheme(currentSettings.bgColor, currentSettings.textColor, currentSettings.themeEnabled);
+      updateDomainToggleState(currentSettings.themeEnabled);
+      const excludedSites = currentSettings.excludeDomains.split("\n").filter(Boolean);
+      const isDomainEnabled = !excludedSites.includes(currentDomain);
+      updateExtensionIcon(currentSettings.themeEnabled, isDomainEnabled);
 
-      chrome.storage.sync.set({ excludeDomains: excludeDomainsInput.value }, () => {
-        const newExclusions = excludeDomainsInput.value.split("\n").filter(Boolean);
-
-        chrome.tabs.query({}, (tabs) => {
-          tabs.forEach((tab) => {
-            const currentDomain = new URL(tab.url).hostname;
-            const wasExcluded = previousExclusions.includes(currentDomain);
-            const isExcludedNow = newExclusions.includes(currentDomain);
-
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs.length && !tabs[0].url.startsWith("chrome://")) {
+          if (currentSettings.themeEnabled && !excludedSites.includes(currentDomain)) {
             chrome.scripting.executeScript({
-              target: { tabId: tab.id },
-              func: (wasExcluded, isExcludedNow) => {
-                if (!wasExcluded && isExcludedNow) {
-                  document.documentElement.classList.remove("blue-mode");
-                } else if (wasExcluded && !isExcludedNow) {
-                  document.documentElement.classList.add("blue-mode");
-                }
+              target: { tabId: tabs[0].id },
+              func: (bg, text) => {
+                document.documentElement.style.setProperty("--bg-color", bg);
+                document.documentElement.style.setProperty("--text-color", text);
+                document.documentElement.classList.add("blue-mode");
               },
-              args: [wasExcluded, isExcludedNow]
-            }).catch(err => console.warn("Failed to apply exclusions:", err));
-          });
-        });
+              args: [currentSettings.bgColor, currentSettings.textColor]
+            }).catch(() => {});
+          } else {
+            chrome.scripting.executeScript({
+              target: { tabId: tabs[0].id },
+              func: () => {
+                document.documentElement.style.removeProperty("--bg-color");
+                document.documentElement.style.removeProperty("--text-color");
+                document.documentElement.classList.remove("blue-mode");
+              }
+            }).catch(() => {});
+          }
+        }
       });
     });
   });
 
-  themeToggle.addEventListener("change", () => {
-    const newThemeEnabled = themeToggle.checked;
-    chrome.storage.sync.set({ themeEnabled: newThemeEnabled }, () => {
-      updatePopupTheme(bgPicker.value, textPicker.value, newThemeEnabled);
-      applyColorsToAllTabs(bgPicker.value, textPicker.value, newThemeEnabled);
-    });
-  });
-
   bgPicker.addEventListener("input", () => {
-    const newBgColor = bgPicker.value;
-    chrome.storage.sync.set({ bgColor: newBgColor }, () => {
-      updatePopupTheme(newBgColor, textPicker.value, themeToggle.checked);
-      applyColorsToAllTabs(newBgColor, textPicker.value, themeToggle.checked);
+    currentSettings.bgColor = bgPicker.value;
+    chrome.storage.sync.set({ bgColor: currentSettings.bgColor }, () => {
+      updatePopupTheme(currentSettings.bgColor, currentSettings.textColor, currentSettings.themeEnabled);
+      updateCurrentTab();
     });
   });
 
   textPicker.addEventListener("input", () => {
-    const newTextColor = textPicker.value;
-    chrome.storage.sync.set({ textColor: newTextColor }, () => {
-      updatePopupTheme(bgPicker.value, newTextColor, themeToggle.checked);
-      applyColorsToAllTabs(bgPicker.value, newTextColor, themeToggle.checked);
+    currentSettings.textColor = textPicker.value;
+    chrome.storage.sync.set({ textColor: currentSettings.textColor }, () => {
+      updatePopupTheme(currentSettings.bgColor, currentSettings.textColor, currentSettings.themeEnabled);
+      updateCurrentTab();
     });
   });
 
   resetBtn.addEventListener("click", () => {
-    chrome.storage.sync.set({ bgColor: fallbackBg, textColor: fallbackText });
-    bgPicker.value = fallbackBg;
-    textPicker.value = fallbackText;
-    updatePopupTheme(fallbackBg, fallbackText, themeToggle.checked);
-    applyColorsToAllTabs(fallbackBg, fallbackText, themeToggle.checked);
+    currentSettings.bgColor = fallbackBg;
+    currentSettings.textColor = fallbackText;
+    chrome.storage.sync.set({ bgColor: fallbackBg, textColor: fallbackText }, () => {
+      bgPicker.value = fallbackBg;
+      textPicker.value = fallbackText;
+      updatePopupTheme(fallbackBg, fallbackText, currentSettings.themeEnabled);
+      updateCurrentTab();
+    });
   });
 
   exportBtn.addEventListener("click", () => {
-    const bstcFormat = `${bgPicker.value}$${textPicker.value}`;
-    const blob = new Blob([bstcFormat], { type: "text/plain" });
+    const blob = new Blob([`${currentSettings.bgColor}$${currentSettings.textColor}`], { type: "text/plain" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "Bluescale-Settings.bstc";
     a.click();
   });
 
-  importBtn.addEventListener("click", () => {
-    importFile.click();
-  });
-
-  importFile.setAttribute("title", "Bluescale Theme Controller file *.bstc");
+  importBtn.addEventListener("click", () => importFile.click());
 
   importFile.addEventListener("change", (event) => {
-    const file = event.target.files[0];
     const reader = new FileReader();
-    reader.onload = function (e) {
+    reader.onload = (e) => {
       let [background, text] = e.target.result.split("$");
-      background = background.trim();
-      text = text.trim();
-      chrome.storage.sync.set({ bgColor: background, textColor: text });
-      bgPicker.value = background;
-      textPicker.value = text;
-      updatePopupTheme(background, text, themeToggle.checked);
-      applyColorsToAllTabs(background, text, themeToggle.checked);
+      currentSettings.bgColor = background.trim();
+      currentSettings.textColor = text.trim();
+      chrome.storage.sync.set({ bgColor: currentSettings.bgColor, textColor: currentSettings.textColor }, () => {
+        bgPicker.value = currentSettings.bgColor;
+        textPicker.value = currentSettings.textColor;
+        updatePopupTheme(currentSettings.bgColor, currentSettings.textColor, currentSettings.themeEnabled);
+        updateCurrentTab();
+      });
     };
-    reader.readAsText(file);
+    reader.readAsText(event.target.files[0]);
   });
 
+  initializePopup();
 });
